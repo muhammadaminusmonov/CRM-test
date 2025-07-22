@@ -1,0 +1,1526 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CRM - Groups Management</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        :root {
+            --sidebar-width: 260px;
+            --sidebar-bg: #1e1e2d;
+            --sidebar-hover: #2a2a3c;
+            --sidebar-active: #3699ff;
+            --sidebar-text: #a2a3b7;
+            --main-bg: #f5f8fa;
+            --header-height: 70px;
+            --transition: all 0.3s ease;
+            --card-bg: #ffffff;
+            --primary: #3699ff;
+            --secondary: #8950fc;
+            --success: #1bc5bd;
+            --warning: #ffa800;
+            --danger: #f64e60;
+            --text-primary: #3f4254;
+            --text-secondary: #b5b5c3;
+        }
+
+        body {
+            display: flex;
+            background-color: var(--main-bg);
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Sidebar Styles */
+        .sidebar {
+            width: var(--sidebar-width);
+            background: var(--sidebar-bg);
+            height: 100vh;
+            padding: 20px 0;
+            transition: var(--transition);
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            z-index: 100;
+        }
+
+        .logo {
+            color: white;
+            font-size: 28px;
+            font-weight: 700;
+            text-align: center;
+            padding: 20px 0;
+            margin-bottom: 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .nav-links {
+            flex: 1;
+            overflow-y: auto;
+            padding: 0 15px;
+        }
+
+        .nav-links::-webkit-scrollbar {
+            width: 5px;
+        }
+
+        .nav-links::-webkit-scrollbar-thumb {
+            background: var(--sidebar-active);
+            border-radius: 10px;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            padding: 14px 20px;
+            margin: 8px 0;
+            border-radius: 8px;
+            color: var(--sidebar-text);
+            text-decoration: none;
+            transition: var(--transition);
+            cursor: pointer;
+        }
+
+        .nav-item:hover {
+            background: var(--sidebar-hover);
+            color: white;
+            transform: translateX(5px);
+        }
+
+        .nav-item.active {
+            background: var(--sidebar-active);
+            color: white;
+            box-shadow: 0 4px 10px rgba(54, 153, 255, 0.3);
+        }
+
+        .nav-item i {
+            font-size: 18px;
+            width: 30px;
+            margin-right: 15px;
+            text-align: center;
+        }
+
+        .nav-text {
+            font-size: 15px;
+            font-weight: 500;
+        }
+
+        /* Main Content Styles */
+        .main-content {
+            flex: 1;
+            height: 100vh;
+            overflow: auto;
+            position: relative;
+            padding: 20px;
+        }
+
+        .content-header {
+            height: var(--header-height);
+            background: white;
+            box-shadow: 0 1px 15px rgba(0, 0, 0, 0.04);
+            padding: 0 30px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .welcome-text {
+            font-size: 18px;
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        .date-display {
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        .page-title {
+            font-size: 24px;
+            color: var(--text-primary);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+        }
+
+        .page-title i {
+            margin-right: 12px;
+            color: var(--primary);
+        }
+
+        .groups-container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+            transition: var(--transition);
+        }
+
+        .card:hover {
+            box-shadow: 0 6px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .card-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            border: none;
+            display: inline-flex;
+            align-items: center;
+        }
+
+        .btn i {
+            margin-right: 8px;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+            box-shadow: 0 4px 10px rgba(54, 153, 255, 0.3);
+        }
+
+        .btn-primary:hover {
+            background: #187de4;
+            transform: translateY(-2px);
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid #e1e3ea;
+            color: var(--text-primary);
+        }
+
+        .btn-outline:hover {
+            background: #f5f8fa;
+        }
+
+        .btn-danger {
+            background: rgba(246, 78, 96, 0.1);
+            color: var(--danger);
+        }
+
+        .btn-danger:hover {
+            background: var(--danger);
+            color: white;
+        }
+
+        /* Table Styles */
+        .table-responsive {
+            overflow-x: auto;
+            border-radius: 8px;
+            border: 1px solid #ebedf3;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            text-align: left;
+            padding: 15px 10px;
+            color: var(--text-secondary);
+            font-weight: 600;
+            background: #f8f9fa;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        td {
+            text-align: left;
+            padding: 15px 10px;
+            color: var(--text-primary);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:hover td {
+            background: rgba(54, 153, 255, 0.03);
+        }
+
+        .group-title {
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .group-class {
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        .status {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            display: inline-block;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .status.active {
+            background: rgba(27, 197, 189, 0.1);
+            color: var(--success);
+        }
+
+        .status.inactive {
+            background: rgba(181, 181, 195, 0.1);
+            color: var(--text-secondary);
+        }
+
+        .status.closed {
+            background: rgba(246, 78, 96, 0.1);
+            color: var(--danger);
+        }
+
+        .status:hover {
+            opacity: 0.9;
+            transform: scale(1.05);
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+        }
+
+        .action-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .edit-btn {
+            background: rgba(54, 153, 255, 0.1);
+            color: var(--primary);
+        }
+
+        .edit-btn:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        .delete-btn {
+            background: rgba(246, 78, 96, 0.1);
+            color: var(--danger);
+        }
+
+        .delete-btn:hover {
+            background: var(--danger);
+            color: white;
+        }
+
+        /* Student Section */
+        .students-section {
+            margin-top: 30px;
+            display: none;
+            animation: fadeIn 0.4s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #ebedf3;
+        }
+
+        .section-title {
+            font-size: 20px;
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        .student-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .student-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 16px;
+        }
+
+        .student-name {
+            font-weight: 600;
+            margin-bottom: 3px;
+        }
+
+        .student-email {
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        /* Stats Cards */
+        .stats-container {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+            display: flex;
+            flex-direction: column;
+            transition: var(--transition);
+        }
+
+        .stat-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 25px rgba(0, 0, 0, 0.08);
+        }
+
+        .stat-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .stat-title {
+            font-size: 16px;
+            color: var(--text-secondary);
+            font-weight: 600;
+        }
+
+        .stat-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+        }
+
+        .stat-icon.primary {
+            background: rgba(54, 153, 255, 0.1);
+            color: var(--primary);
+        }
+
+        .stat-icon.secondary {
+            background: rgba(137, 80, 252, 0.1);
+            color: var(--secondary);
+        }
+
+        .stat-icon.success {
+            background: rgba(27, 197, 189, 0.1);
+            color: var(--success);
+        }
+
+        .stat-icon.warning {
+            background: rgba(255, 168, 0, 0.1);
+            color: var(--warning);
+        }
+
+        .stat-value {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+        }
+
+        .stat-meta {
+            display: flex;
+            align-items: center;
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 12px;
+            width: 100%;
+            max-width: 600px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+        }
+
+        .modal-header {
+            padding: 20px 25px;
+            background: var(--primary);
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-title {
+            font-size: 20px;
+            font-weight: 600;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+        }
+
+        .close-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .modal-body {
+            padding: 25px;
+            max-height: 70vh;
+            overflow-y: auto;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #e1e3ea;
+            border-radius: 8px;
+            font-size: 15px;
+            transition: var(--transition);
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(54, 153, 255, 0.1);
+        }
+
+        textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 20px;
+        }
+
+        .form-row .form-group {
+            flex: 1;
+        }
+
+        .modal-footer {
+            padding: 20px 25px;
+            background: #f5f8fa;
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+        }
+
+        /* Search and Filter */
+        .table-controls {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .search-box {
+            position: relative;
+            width: 300px;
+        }
+
+        .search-box input {
+            padding-left: 40px;
+        }
+
+        .search-box i {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-secondary);
+        }
+
+        .filter-controls {
+            display: flex;
+            gap: 12px;
+        }
+
+        .filter-select {
+            min-width: 150px;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1200px) {
+            .stats-container {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 992px) {
+            .form-row {
+                flex-direction: column;
+                gap: 0;
+            }
+
+            .stats-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .table-controls {
+                flex-direction: column;
+                gap: 15px;
+            }
+            .search-box {
+                width: 100%;
+            }
+
+            .sidebar {
+                width: 80px;
+            }
+            .nav-text {
+                display: none;
+            }
+            .logo span {
+                display: none;
+            }
+            .logo::after {
+                content: "CRM";
+            }
+
+            .action-buttons {
+                flex-direction: column;
+            }
+        }
+
+        /* Selected Group Highlight */
+        .group-row.selected {
+            background-color: rgba(54, 153, 255, 0.05);
+            box-shadow: inset 3px 0 0 var(--primary);
+        }
+
+        .no-data {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--text-secondary);
+        }
+
+        .no-data i {
+            font-size: 48px;
+            margin-bottom: 15px;
+            color: #e1e3ea;
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="logo">
+            <span>CRM</span>
+        </div>
+        <div class="nav-links">
+            <a href="{% url 'statistic' %}" class="nav-item">
+                <i class="fas fa-chart-bar"></i>
+                <span class="nav-text">Statistics</span>
+            </a>
+            <a href="{% url 'teacher' %}" class="nav-item">
+                <i class="fas fa-chalkboard-teacher"></i>
+                <span class="nav-text">Teachers</span>
+            </a>
+            <a href="{% url 'students_list' %}" class="nav-item">
+                <i class="fas fa-user-graduate"></i>
+                <span class="nav-text">Students</span>
+            </a>
+            <a href="{% url 'staff_list' %}" class="nav-item">
+                <i class="fas fa-users"></i>
+                <span class="nav-text">Staff</span>
+            </a>
+            <a href="{% url 'attendance' %}" class="nav-item">
+                <i class="fas fa-calendar-check"></i>
+                <span class="nav-text">Attendance</span>
+            </a>
+            <a href="{% url 'classes' %}" class="nav-item">
+                <i class="fas fa-book-open"></i>
+                <span class="nav-text">Classes</span>
+            </a>
+            <a href="{% url 'group_management' %}" class="nav-item active">
+                <i class="fas fa-object-group"></i>
+                <span class="nav-text">Groups</span>
+            </a>
+            <a href="{% url 'costs_management' %}" class="nav-item">
+                <i class="fas fa-money-bill-wave"></i>
+                <span class="nav-text">Costs</span>
+            </a>
+            <a href="{% url 'expense_management' %}" class="nav-item">
+                <i class="fas fa-file-invoice-dollar"></i>
+                <span class="nav-text">Expenses</span>
+            </a>
+            <a href="{% url 'payment_management' %}" class="nav-item">
+                <i class="fas fa-credit-card"></i>
+                <span class="nav-text">Payments</span>
+            </a>
+            <a href="{% url 'profit_analysis' %}" class="nav-item">
+                <i class="fas fa-chart-line"></i>
+                <span class="nav-text">Profit</span>
+            </a>
+            <a href="{% url 'teacher_salary' %}" class="nav-item">
+                <i class="fas fa-money-check-alt"></i>
+                <span class="nav-text">Teacher Salary</span>
+            </a>
+            <a href="{% url 'staff_salary' %}" class="nav-item">
+                <i class="fas fa-money-check"></i>
+                <span class="nav-text">Staff Salary</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="content-header">
+            <div class="welcome-text">Groups Management</div>
+            <div class="date-display">{{ current_date|date:"l, F d, Y" }}</div>
+        </div>
+
+        <div class="page-title">
+            <i class="fas fa-object-group"></i>
+            <h1>Groups</h1>
+        </div>
+
+        <div class="stats-container">
+            <div class="stat-card">
+                <div class="stat-header">
+                    <div class="stat-title">TOTAL GROUPS</div>
+                    <div class="stat-icon primary">
+                        <i class="fas fa-layer-group"></i>
+                    </div>
+                </div>
+                <div class="stat-value">{{ total_groups }}</div>
+                <div class="stat-meta">
+                    <span>Groups in system</span>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-header">
+                    <div class="stat-title">ACTIVE GROUPS</div>
+                    <div class="stat-icon success">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                </div>
+                <div class="stat-value">{{ active_groups }}</div>
+                <div class="stat-meta">
+                    <span>{{ active_percentage }}% of all groups</span>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-header">
+                    <div class="stat-title">AVERAGE SIZE</div>
+                    <div class="stat-icon secondary">
+                        <i class="fas fa-users"></i>
+                    </div>
+                </div>
+                <div class="stat-value">{{ avg_students_per_group|default:"8" }}</div>
+                <div class="stat-meta">
+                    <span>students per group</span>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-header">
+                    <div class="stat-title">POPULAR CLASS</div>
+                    <div class="stat-icon warning">
+                        <i class="fas fa-star"></i>
+                    </div>
+                </div>
+                <div class="stat-value">{{ popular_class|default:"Mathematics" }}</div>
+                <div class="stat-meta">
+                    <span>{{ popular_class_count|default:"6" }} active groups</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="groups-container">
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">Groups List</div>
+                    <button class="btn btn-primary" id="addGroupBtn">
+                        <i class="fas fa-plus"></i> Add Group
+                    </button>
+                </div>
+
+                <div class="table-controls">
+                    <div class="search-box">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="searchInput" placeholder="Search groups...">
+                    </div>
+                    <div class="filter-controls">
+                        <select class="filter-select" id="statusFilter">
+                            <option value="all">All Status</option>
+                            <option value="active">Active</option>
+                            <option value="completed">Completed</option>
+                            <option value="closed">Closed</option>
+                            <option value="on hold">On hold</option>
+                        </select>
+                        <select class="filter-select" id="classFilter">
+                            <option value="all">All Classes</option>
+                            {% for class_obj in classes %}
+                                <option value="{{ class_obj.title }}">{{ class_obj.title }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Group Name</th>
+                                <th>Teacher</th>
+                                <th>Class</th>
+                                <th>Start Date</th>
+                                <th>End Date</th>
+                                <th>Lessons/Week</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="groupsTable">
+                            <!-- Groups will be populated by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Students Section (Hidden by default) -->
+        <div class="students-section" id="studentsSection">
+            <div class="section-header">
+                <div class="section-title">Students in <span id="selectedGroupName">Group Name</span></div>
+                <button class="btn btn-outline" id="addStudentBtn">
+                    <i class="fas fa-user-plus"></i> Add Student
+                </button>
+            </div>
+
+            <div class="card">
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Student</th>
+                                <th>Email</th>
+                                <th>Join Date</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="studentsTable">
+                            <!-- Students will be populated by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add/Edit Group Modal -->
+    <div class="modal" id="groupModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title" id="modalTitle">Add New Group</div>
+                <button class="close-btn" id="closeModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="groupForm">
+                    {% csrf_token %}
+                    <input type="hidden" id="groupId">
+                    <div class="form-group">
+                        <label for="groupName">Group Name</label>
+                        <input type="text" id="groupName" name="name" required>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="teacher">Teacher</label>
+                            <select id="teacher" name="teacher" required>
+                                <option value="">Select Teacher</option>
+                                {% for teacher in teachers %}
+                                    <option value="{{ teacher.id }}">{{ teacher.first_name }} {{ teacher.last_name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="class">Class</label>
+                            <select id="class" name="classes" required>
+                                <option value="">Select Class</option>
+                                {% for class_obj in classes %}
+                                    <option value="{{ class_obj.id }}">{{ class_obj.title }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="startDate">Start Date</label>
+                            <input type="datetime-local" id="startDate" name="start_at" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="endDate">End Date</label>
+                            <input type="datetime-local" id="endDate" name="end_at">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="lessonsPerWeek">Lessons Per Week</label>
+                            <input type="number" id="lessonsPerWeek" name="lesson_per_week" min="1" max="7" value="2" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="status">Status</label>
+                            <select id="status" name="status" required>
+                                <option value="1">Active</option>
+                                <option value="2">Completed</option>
+                                <option value="3">Closed</option>
+                                <option value="4">On hold</option>
+                            </select>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" id="cancelBtn">Cancel</button>
+                <button class="btn btn-primary" id="saveGroupBtn">Save Group</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Student Modal -->
+    <div class="modal" id="studentModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">Add Student to Group</div>
+                <button class="close-btn" id="closeStudentModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="studentSearch" placeholder="Search students...">
+                </div>
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Student</th>
+                                <th>Email</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="availableStudents">
+                            <!-- Available students will be populated here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Get groups data from Django context
+        const groups = JSON.parse('{{ groups_json|escapejs }}');
+        let selectedGroupId = null;
+        const csrfToken = "{{ csrf_token }}";
+
+        // DOM elements
+        const groupsTable = document.getElementById('groupsTable');
+        const studentsTable = document.getElementById('studentsTable');
+        const studentsSection = document.getElementById('studentsSection');
+        const selectedGroupName = document.getElementById('selectedGroupName');
+        const groupModal = document.getElementById('groupModal');
+        const modalTitle = document.getElementById('modalTitle');
+        const addGroupBtn = document.getElementById('addGroupBtn');
+        const closeModal = document.getElementById('closeModal');
+        const saveGroupBtn = document.getElementById('saveGroupBtn');
+        const groupForm = document.getElementById('groupForm');
+        const searchInput = document.getElementById('searchInput');
+        const statusFilter = document.getElementById('statusFilter');
+        const classFilter = document.getElementById('classFilter');
+        const addStudentBtn = document.getElementById('addStudentBtn');
+        const studentModal = document.getElementById('studentModal');
+        const closeStudentModal = document.getElementById('closeStudentModal');
+        const studentSearch = document.getElementById('studentSearch');
+        const availableStudents = document.getElementById('availableStudents');
+
+        // Initialize the page
+        document.addEventListener('DOMContentLoaded', () => {
+            renderGroups(groups);
+            setupEventListeners();
+        });
+
+        function setupEventListeners() {
+            addGroupBtn.addEventListener('click', openAddModal);
+            closeModal.addEventListener('click', closeGroupModal);
+            saveGroupBtn.addEventListener('click', saveGroup);
+            searchInput.addEventListener('input', filterGroups);
+            statusFilter.addEventListener('change', filterGroups);
+            classFilter.addEventListener('change', filterGroups);
+            addStudentBtn.addEventListener('click', openAddStudentModal);
+            closeStudentModal.addEventListener('click', closeStudentModalFunc);
+            studentSearch.addEventListener('input', searchStudents);
+        }
+
+        function renderGroups(groupsArray) {
+            groupsTable.innerHTML = '';
+
+            if (groupsArray.length === 0) {
+                groupsTable.innerHTML = `
+                    <tr>
+                        <td colspan="8">
+                            <div class="no-data">
+                                <i class="fas fa-layer-group"></i>
+                                <h3>No groups found</h3>
+                                <p>Try changing your filters or add a new group</p>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            groupsArray.forEach(group => {
+                const row = document.createElement('tr');
+                row.className = 'group-row';
+                row.dataset.id = group.id;
+
+                if (selectedGroupId === group.id) {
+                    row.classList.add('selected');
+                }
+
+                row.innerHTML = `
+                    <td>
+                        <div class="group-title">${group.name}</div>
+                        <div class="group-class">${group.class_name}</div>
+                    </td>
+                    <td>${group.teacher}</td>
+                    <td>${group.class_name}</td>
+                    <td>${formatDate(group.start_at)}</td>
+                    <td>${group.end_at ? formatDate(group.end_at) : '-'}</td>
+                    <td>${group.lessons_per_week}</td>
+                    <td>
+                        <div class="status ${group.status}" data-id="${group.id}">
+                            ${group.status.charAt(0).toUpperCase() + group.status.slice(1)}
+                        </div>
+                    </td>
+                    <td>
+                        <div class="action-buttons">
+                            <div class="action-btn edit-btn" data-id="${group.id}">
+                                <i class="fas fa-edit"></i>
+                            </div>
+                            <div class="action-btn delete-btn" data-id="${group.id}">
+                                <i class="fas fa-trash"></i>
+                            </div>
+                        </div>
+                    </td>
+                `;
+
+                groupsTable.appendChild(row);
+            });
+
+            // Add event listeners to group rows
+            document.querySelectorAll('.group-row').forEach(row => {
+                row.addEventListener('click', (e) => {
+                    if (!e.target.closest('.action-btn')) {
+                        selectGroup(row.dataset.id);
+                    }
+                });
+            });
+
+            // Add event listeners to action buttons
+            document.querySelectorAll('.edit-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    openEditModal(btn.dataset.id);
+                });
+            });
+
+            document.querySelectorAll('.delete-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    deleteGroup(btn.dataset.id);
+                });
+            });
+
+            // Add event listeners to status indicators
+            document.querySelectorAll('.status').forEach(status => {
+                status.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    toggleGroupStatus(status.dataset.id);
+                });
+            });
+        }
+
+        function renderStudents(groupId) {
+            const group = groups.find(g => g.id == groupId);
+            if (!group) return;
+
+            studentsTable.innerHTML = '';
+
+            if (group.students.length === 0) {
+                studentsTable.innerHTML = `
+                    <tr>
+                        <td colspan="5">
+                            <div class="no-data">
+                                <i class="fas fa-user-graduate"></i>
+                                <h3>No students in this group</h3>
+                                <p>Add students using the "Add Student" button</p>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            group.students.forEach(student => {
+                const row = document.createElement('tr');
+
+                // Get initials for avatar
+                const names = student.name.split(' ');
+                const initials = names[0].charAt(0) + (names[1] ? names[1].charAt(0) : names[0].charAt(1));
+
+                row.innerHTML = `
+                    <td>
+                        <div class="student-info">
+                            <div class="student-avatar">${initials}</div>
+                            <div>
+                                <div class="student-name">${student.name}</div>
+                                <div class="student-email">${student.email}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td>${student.email}</td>
+                    <td>${formatDate(student.join_date)}</td>
+                    <td>
+                        <div class="status ${student.status}">
+                            ${student.status.charAt(0).toUpperCase() + student.status.slice(1)}
+                        </div>
+                    </td>
+                    <td>
+                        <div class="action-buttons">
+                            <div class="action-btn delete-btn" data-student-id="${student.id}">
+                                <i class="fas fa-trash"></i>
+                            </div>
+                        </div>
+                    </td>
+                `;
+
+                studentsTable.appendChild(row);
+            });
+
+            // Add event listeners to delete buttons
+            document.querySelectorAll('[data-student-id]').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const studentId = btn.dataset.studentId;
+                    removeStudentFromGroup(groupId, studentId);
+                });
+            });
+        }
+
+        function selectGroup(id) {
+            selectedGroupId = parseInt(id);
+
+            // Update UI
+            document.querySelectorAll('.group-row').forEach(row => {
+                row.classList.remove('selected');
+                if (row.dataset.id == id) {
+                    row.classList.add('selected');
+                }
+            });
+
+            const group = groups.find(g => g.id == id);
+            if (group) {
+                selectedGroupName.textContent = group.name;
+                studentsSection.style.display = 'block';
+                renderStudents(id);
+
+                // Scroll to students section
+                studentsSection.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+        }
+
+        function openAddModal() {
+            modalTitle.textContent = 'Add New Group';
+            groupForm.reset();
+            document.getElementById('groupId').value = '';
+            groupModal.style.display = 'flex';
+        }
+
+        function openEditModal(id) {
+            const group = groups.find(g => g.id == id);
+            if (group) {
+                modalTitle.textContent = 'Edit Group';
+                document.getElementById('groupId').value = group.id;
+                document.getElementById('groupName').value = group.name;
+
+                // Set teacher if available
+                if (group.teacher_id) {
+                    document.getElementById('teacher').value = group.teacher_id;
+                }
+
+                // Set class if available
+                if (group.class_id) {
+                    document.getElementById('class').value = group.class_id;
+                }
+
+                document.getElementById('startDate').value = formatDateTimeForInput(group.start_at);
+
+                if (group.end_at) {
+                    document.getElementById('endDate').value = formatDateTimeForInput(group.end_at);
+                }
+
+                document.getElementById('lessonsPerWeek').value = group.lessons_per_week;
+                document.getElementById('status').value = group.status_id; // Assuming status_id is stored
+
+                groupModal.style.display = 'flex';
+            }
+        }
+
+        function closeGroupModal() {
+            groupModal.style.display = 'none';
+        }
+
+        function saveGroup() {
+            const id = document.getElementById('groupId').value;
+            const formData = new FormData(groupForm);
+
+            // Convert form data to URL-encoded string
+            const params = new URLSearchParams();
+            for (const [key, value] of formData.entries()) {
+                params.append(key, value);
+            }
+
+            const url = id ? `/groups/save-group/?id=${id}` : '/groups/save-group/';
+
+            fetch(url, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': csrfToken,
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: params
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Reload the page to reflect changes
+                    location.reload();
+                } else {
+                    alert('Error saving group: ' + JSON.stringify(data.errors));
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred while saving the group');
+            });
+        }
+
+        function deleteGroup(id) {
+            if (confirm('Are you sure you want to delete this group? This action cannot be undone.')) {
+                fetch(`/groups/delete-group/${id}/`, {
+                    method: 'DELETE',
+                    headers: {
+                        'X-CSRFToken': csrfToken
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Reload the page to reflect changes
+                        location.reload();
+                    } else {
+                        alert('Error deleting group');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('An error occurred while deleting the group');
+                });
+            }
+        }
+
+        function openAddStudentModal() {
+            if (!selectedGroupId) {
+                alert('Please select a group first');
+                return;
+            }
+
+            // Clear previous results
+            availableStudents.innerHTML = '';
+            studentSearch.value = '';
+
+            // Show the modal
+            studentModal.style.display = 'flex';
+
+            // Load available students
+            searchStudents();
+        }
+
+        function closeStudentModalFunc() {
+            studentModal.style.display = 'none';
+        }
+
+        function searchStudents() {
+            const searchTerm = studentSearch.value.toLowerCase();
+
+            // In a real app, this would be an API call to the server
+            // For this example, we'll simulate with client-side filtering
+            fetch('/students/api/available-students/')  // You'd need to implement this endpoint
+            .then(response => response.json())
+            .then(students => {
+                availableStudents.innerHTML = '';
+
+                const filteredStudents = students.filter(student => {
+                    const fullName = `${student.first_name} ${student.last_name}`.toLowerCase();
+                    const email = student.email.toLowerCase();
+                    return fullName.includes(searchTerm) || email.includes(searchTerm);
+                });
+
+                if (filteredStudents.length === 0) {
+                    availableStudents.innerHTML = `
+                        <tr>
+                            <td colspan="4">
+                                <div class="no-data">
+                                    <i class="fas fa-user-graduate"></i>
+                                    <h3>No students found</h3>
+                                    <p>Try a different search term</p>
+                                </div>
+                            </td>
+                        </tr>
+                    `;
+                    return;
+                }
+
+                filteredStudents.forEach(student => {
+                    const row = document.createElement('tr');
+                    const initials = student.first_name.charAt(0) + student.last_name.charAt(0);
+
+                    row.innerHTML = `
+                        <td>
+                            <div class="student-info">
+                                <div class="student-avatar">${initials}</div>
+                                <div>
+                                    <div class="student-name">${student.first_name} ${student.last_name}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td>${student.email}</td>
+                        <td>
+                            <div class="status ${student.status}">
+                                ${student.status.charAt(0).toUpperCase() + student.status.slice(1)}
+                            </div>
+                        </td>
+                        <td>
+                            <button class="btn btn-primary add-student-btn" data-student-id="${student.id}">
+                                <i class="fas fa-plus"></i> Add
+                            </button>
+                        </td>
+                    `;
+
+                    availableStudents.appendChild(row);
+                });
+
+                // Add event listeners to add buttons
+                document.querySelectorAll('.add-student-btn').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        const studentId = btn.dataset.studentId;
+                        addStudentToGroup(selectedGroupId, studentId);
+                    });
+                });
+            })
+            .catch(error => {
+                console.error('Error loading students:', error);
+                availableStudents.innerHTML = `
+                    <tr>
+                        <td colspan="4">Error loading students. Please try again.</td>
+                    </tr>
+                `;
+            });
+        }
+
+        function addStudentToGroup(groupId, studentId) {
+            const formData = new FormData();
+            formData.append('student_id', studentId);
+
+            fetch(`/groups/add-student/${groupId}/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': csrfToken
+                },
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Close the modal and refresh the student list
+                    closeStudentModalFunc();
+                    renderStudents(groupId);
+                    showNotification('Student added to group', 'success');
+                } else {
+                    alert('Error adding student to group');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred while adding the student');
+            });
+        }
+
+        function removeStudentFromGroup(groupId, studentId) {
+            if (confirm('Are you sure you want to remove this student from the group?')) {
+                fetch(`/groups/remove-student/${groupId}/${studentId}/`, {
+                    method: 'DELETE',
+                    headers: {
+                        'X-CSRFToken': csrfToken
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Refresh the student list
+                        renderStudents(groupId);
+                        showNotification('Student removed from group', 'warning');
+                    } else {
+                        alert('Error removing student from group');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('An error occurred while removing the student');
+                });
+            }
+        }
+
+        function filterGroups() {
+            const searchTerm = searchInput.value.toLowerCase();
+            const statusValue = statusFilter.value;
+            const classValue = classFilter.value;
+
+            const filtered = groups.filter(group => {
+                const matchesSearch = group.name.toLowerCase().includes(searchTerm) ||
+                                    group.teacher.toLowerCase().includes(searchTerm) ||
+                                    group.class_name.toLowerCase().includes(searchTerm);
+
+                const matchesStatus = statusValue === 'all' || group.status === statusValue;
+                const matchesClass = classValue === 'all' || group.class_name === classValue;
+
+                return matchesSearch && matchesStatus && matchesClass;
+            });
+
+            renderGroups(filtered);
+        }
+
+        // Helper function to format date
+        function formatDate(dateString) {
+            if (!dateString) return '-';
+            const date = new Date(dateString);
+            return date.toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric'
+            });
+        }
+
+        // Helper function to format date for datetime-local input
+        function formatDateTimeForInput(dateString) {
+            if (!dateString) return '';
+            const date = new Date(dateString);
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            const hours = String(date.getHours()).padStart(2, '0');
+            const minutes = String(date.getMinutes()).padStart(2, '0');
+            return `${year}-${month}-${day}T${hours}:${minutes}`;
+        }
+
+        // Show notification
+        function showNotification(message, type) {
+            // Implementation same as in static page
+        }
+    </script>
+</body>
+</html>

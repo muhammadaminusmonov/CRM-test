@@ -1,0 +1,906 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CRM - Teachers Management</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        :root {
+            --sidebar-width: 260px;
+            --sidebar-bg: #1e1e2d;
+            --sidebar-hover: #2a2a3c;
+            --sidebar-active: #3699ff;
+            --sidebar-text: #a2a3b7;
+            --main-bg: #f5f8fa;
+            --header-height: 70px;
+            --transition: all 0.3s ease;
+            --card-bg: #ffffff;
+            --primary: #3699ff;
+            --secondary: #8950fc;
+            --success: #1bc5bd;
+            --warning: #ffa800;
+            --danger: #f64e60;
+            --text-primary: #3f4254;
+            --text-secondary: #b5b5c3;
+        }
+
+        body {
+            display: flex;
+            background-color: var(--main-bg);
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Sidebar Styles */
+        .sidebar {
+            width: var(--sidebar-width);
+            background: var(--sidebar-bg);
+            height: 100vh;
+            padding: 20px 0;
+            transition: var(--transition);
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            z-index: 100;
+        }
+
+        .logo {
+            color: white;
+            font-size: 28px;
+            font-weight: 700;
+            text-align: center;
+            padding: 20px 0;
+            margin-bottom: 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .nav-links {
+            flex: 1;
+            overflow-y: auto;
+            padding: 0 15px;
+        }
+
+        .nav-links::-webkit-scrollbar {
+            width: 5px;
+        }
+
+        .nav-links::-webkit-scrollbar-thumb {
+            background: var(--sidebar-active);
+            border-radius: 10px;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            padding: 14px 20px;
+            margin: 8px 0;
+            border-radius: 8px;
+            color: var(--sidebar-text);
+            text-decoration: none;
+            transition: var(--transition);
+            cursor: pointer;
+        }
+
+        .nav-item:hover {
+            background: var(--sidebar-hover);
+            color: white;
+            transform: translateX(5px);
+        }
+
+        .nav-item.active {
+            background: var(--sidebar-active);
+            color: white;
+            box-shadow: 0 4px 10px rgba(54, 153, 255, 0.3);
+        }
+
+        .nav-item i {
+            font-size: 18px;
+            width: 30px;
+            margin-right: 15px;
+            text-align: center;
+        }
+
+        .nav-text {
+            font-size: 15px;
+            font-weight: 500;
+        }
+
+        /* Main Content Styles */
+        .main-content {
+            flex: 1;
+            height: 100vh;
+            overflow: auto;
+            position: relative;
+            padding: 20px;
+        }
+
+        .content-header {
+            height: var(--header-height);
+            background: white;
+            box-shadow: 0 1px 15px rgba(0, 0, 0, 0.04);
+            padding: 0 30px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .welcome-text {
+            font-size: 18px;
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        .date-display {
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        .page-title {
+            font-size: 24px;
+            color: var(--text-primary);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+        }
+
+        .page-title i {
+            margin-right: 12px;
+            color: var(--primary);
+        }
+
+        .teachers-container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .card-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            border: none;
+            display: inline-flex;
+            align-items: center;
+        }
+
+        .btn i {
+            margin-right: 8px;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+            box-shadow: 0 4px 10px rgba(54, 153, 255, 0.3);
+        }
+
+        .btn-primary:hover {
+            background: #187de4;
+            transform: translateY(-2px);
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 14px;
+        }
+
+        /* Table Styles */
+        .table-responsive {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            text-align: left;
+            padding: 15px 10px;
+            color: var(--text-secondary);
+            font-weight: 600;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        td {
+            text-align: left;
+            padding: 15px 10px;
+            color: var(--text-primary);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:hover td {
+            background: rgba(54, 153, 255, 0.03);
+        }
+
+        .avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #e1e3ea;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-right: 10px;
+        }
+
+        .teacher-info {
+            display: flex;
+            align-items: center;
+        }
+
+        .teacher-name {
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .teacher-subject {
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        .status {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            display: inline-block;
+        }
+
+        .status.active {
+            background: rgba(27, 197, 189, 0.1);
+            color: var(--success);
+        }
+
+        .status.inactive {
+            background: rgba(181, 181, 195, 0.1);
+            color: var(--text-secondary);
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+        }
+
+        .action-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .edit-btn {
+            background: rgba(54, 153, 255, 0.1);
+            color: var(--primary);
+        }
+
+        .edit-btn:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        .delete-btn {
+            background: rgba(246, 78, 96, 0.1);
+            color: var(--danger);
+        }
+
+        .delete-btn:hover {
+            background: var(--danger);
+            color: white;
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 12px;
+            width: 100%;
+            max-width: 500px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+        }
+
+        .modal-header {
+            padding: 20px 25px;
+            background: var(--primary);
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-title {
+            font-size: 20px;
+            font-weight: 600;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+        }
+
+        .close-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .modal-body {
+            padding: 25px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        input, select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #e1e3ea;
+            border-radius: 8px;
+            font-size: 15px;
+            transition: var(--transition);
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(54, 153, 255, 0.1);
+        }
+
+        .form-row {
+            display: flex;
+            gap: 20px;
+        }
+
+        .form-row .form-group {
+            flex: 1;
+        }
+
+        .modal-footer {
+            padding: 20px 25px;
+            background: #f5f8fa;
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid #e1e3ea;
+            color: var(--text-primary);
+        }
+
+        .btn-outline:hover {
+            background: #f5f8fa;
+        }
+
+        /* Search and Filter */
+        .table-controls {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            gap: 20px;
+        }
+
+        .search-box {
+            position: relative;
+            width: 300px;
+        }
+
+        .search-box input {
+            padding-left: 40px;
+        }
+
+        .search-box i {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-secondary);
+        }
+
+        .filter-controls {
+            display: flex;
+            gap: 12px;
+        }
+
+        .filter-select {
+            min-width: 150px;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 992px) {
+            .form-row {
+                flex-direction: column;
+                gap: 0;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .table-controls {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .search-box {
+                width: 100%;
+            }
+
+            .sidebar {
+                width: 80px;
+            }
+
+            .nav-text {
+                display: none;
+            }
+
+            .logo span {
+                display: none;
+            }
+
+            .logo::after {
+                content: "CRM";
+            }
+        }
+    </style>
+</head>
+<body>
+<!-- Sidebar -->
+<div class="sidebar">
+    <div class="logo">
+        <span>CRM</span>
+    </div>
+    <div class="nav-links">
+        <a href="{% url 'statistic' %}" class="nav-item">
+            <i class="fas fa-chart-bar"></i>
+            <span class="nav-text">Statistics</span>
+        </a>
+        <a href="{% url 'teacher' %}" class="nav-item active">
+            <i class="fas fa-chalkboard-teacher"></i>
+            <span class="nav-text">Teachers</span>
+        </a>
+        <a href="{% url 'students_list' %}" class="nav-item">
+            <i class="fas fa-user-graduate"></i>
+            <span class="nav-text">Students</span>
+        </a>
+        <a href="{% url 'staff_list' %}" class="nav-item">
+            <i class="fas fa-users"></i>
+            <span class="nav-text">Staff</span>
+        </a>
+        <a href="{% url 'attendance' %}" class="nav-item">
+            <i class="fas fa-calendar-check"></i>
+            <span class="nav-text">Attendance</span>
+        </a>
+        <a href="{% url 'classes' %}" class="nav-item">
+            <i class="fas fa-book-open"></i>
+            <span class="nav-text">Classes</span>
+        </a>
+        <a href="{% url 'group_management' %}" class="nav-item">
+            <i class="fas fa-object-group"></i>
+            <span class="nav-text">Groups</span>
+        </a>
+        <a href="{% url 'costs_management' %}" class="nav-item">
+            <i class="fas fa-money-bill-wave"></i>
+            <span class="nav-text">Costs</span>
+        </a>
+        <a href="{% url 'expense_management' %}" class="nav-item">
+            <i class="fas fa-file-invoice-dollar"></i>
+            <span class="nav-text">Expenses</span>
+        </a>
+        <a href="{% url 'payment_management' %}" class="nav-item">
+            <i class="fas fa-credit-card"></i>
+            <span class="nav-text">Payments</span>
+        </a>
+        <a href="{% url 'profit_analysis' %}" class="nav-item">
+            <i class="fas fa-chart-line"></i>
+            <span class="nav-text">Profit</span>
+        </a>
+        <a href="{% url 'teacher_salary' %}" class="nav-item">
+            <i class="fas fa-money-check-alt"></i>
+            <span class="nav-text">Teacher Salary</span>
+        </a>
+        <a href="{% url 'staff_salary' %}" class="nav-item">
+            <i class="fas fa-money-check"></i>
+            <span class="nav-text">Staff Salary</span>
+        </a>
+    </div>
+</div>
+
+<!-- Main Content -->
+<div class="main-content">
+    <div class="content-header">
+        <div class="welcome-text">Teachers Management</div>
+        <div class="date-display">{{ current_date }}</div>
+    </div>
+
+    <div class="page-title">
+        <i class="fas fa-chalkboard-teacher"></i>
+        <h1>Teachers</h1>
+    </div>
+
+    <div class="teachers-container">
+        <div class="card">
+            <div class="card-header">
+                <div class="card-title">Teachers List</div>
+                <button class="btn btn-primary" id="addTeacherBtn">
+                    <i class="fas fa-plus"></i> Add Teacher
+                </button>
+            </div>
+
+            <div class="table-controls">
+                <form method="GET" action="{% url 'teacher' %}" id="filterForm" class="table-controls">
+                    <div class="search-box">
+                        <i class="fas fa-search"></i>
+                        <input type="text" name="search" value="{{ search_query }}" placeholder="Search teachers...">
+                    </div>
+
+                    <button type="submit" style="display: none"></button>
+                </form>
+            </div>
+
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                    <tr>
+                        <th>Teacher</th>
+                        <th>Email</th>
+                        <th>Phone</th>
+                        <th>Salary Type</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                    </thead>
+                    <tbody id="teachersTable">
+                    {% for teacher in teachers %}
+                    <tr>
+                        <td>
+                            <div class="teacher-info">
+                                <div class="avatar">{{ teacher.first_name|first }}{{ teacher.last_name|first }}</div>
+                                <div>
+                                    <div class="teacher-name">{{ teacher.first_name }} {{ teacher.last_name }}</div>
+                                    <div class="teacher-subject">{{ teacher.get_status_display }}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td>{{ teacher.email }}</td>
+                        <td>{{ teacher.phone_number }}</td>
+                        <td>
+                            {% if teacher.fixed_salary %}
+                            Fixed: ${{ teacher.salary|floatformat:0 }}
+                            {% else %}
+                            Percentage: {{ teacher.percentage }}%
+                            {% endif %}
+                        </td>
+                        <td>
+                                    <span class="status {% if teacher.status == 1 %}active{% else %}inactive{% endif %}">
+                                        {{ teacher.get_status_display }}
+                                    </span>
+                        </td>
+                        <td>
+                            <div class="action-buttons">
+                                <div class="action-btn edit-btn" data-id="{{ teacher.id }}">
+                                    <i class="fas fa-edit"></i>
+                                </div>
+                                <div class="action-btn delete-btn" data-id="{{ teacher.id }}">
+                                    <i class="fas {% if teacher.status == 1 %}fa-trash{% else %}fa-undo{% endif %}"></i>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" style="text-align: center;">No teachers found</td>
+                    </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add/Edit Teacher Modal -->
+<div class="modal" id="teacherModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <div class="modal-title" id="modalTitle">Add New Teacher</div>
+            <button class="close-btn" id="closeModal">&times;</button>
+        </div>
+        <form id="teacherForm" method="POST" action="{% url 'save_teacher' %}">
+            {% csrf_token %}
+            <div class="modal-body">
+                <input type="hidden" id="teacherId" name="teacher_id">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="firstName">First Name</label>
+                        <input type="text" id="firstName" name="first_name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="lastName">Last Name</label>
+                        <input type="text" id="lastName" name="last_name" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="phone_number">Phone</label>
+                    <input type="tel" id="phone_number" name="phone_number" required>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="age">Age</label>
+                        <input type="number" id="age" name="age" min="18" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="born_date">Birth Date</label>
+                        <input type="date" id="born_date" name="born_date" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="address">Address</label>
+                    <textarea id="address" name="address" rows="2" required></textarea>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Salary Type</label>
+                        <div class="form-row" style="gap: 15px; margin-top: 8px;">
+                            <label style="display: flex; align-items: center;">
+                                <input type="radio" name="fixed_salary" value="true" checked> Fixed
+                            </label>
+                            <label style="display: flex; align-items: center;">
+                                <input type="radio" name="fixed_salary" value="false"> Percentage
+                            </label>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="salary">Salary/Percentage</label>
+                        <input type="number" id="salary" name="salary" min="0" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="status">Status</label>
+                    <select id="status" name="status">
+                        {% for value, name in Teacher.STATUS_CHOICES %}
+                        <option value="{{ value }}">{{ name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline" id="cancelBtn">Cancel</button>
+                <button type="submit" class="btn btn-primary" id="saveTeacherBtn">Save Teacher</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    // DOM elements
+    const teacherModal = document.getElementById('teacherModal');
+    const modalTitle = document.getElementById('modalTitle');
+    const addTeacherBtn = document.getElementById('addTeacherBtn');
+    const closeModal = document.getElementById('closeModal');
+    const cancelBtn = document.getElementById('cancelBtn');
+    const teacherForm = document.getElementById('teacherForm');
+    const filterForm = document.getElementById('filterForm');
+
+    // Teacher data from server
+    const teachersData = [
+        { %
+    for teacher in teachers %}
+    {
+        id: "{{ teacher.id }}",
+            firstName
+    :
+        "{{ teacher.first_name }}",
+            lastName
+    :
+        "{{ teacher.last_name }}",
+            email
+    :
+        "{{ teacher.email }}",
+            phone
+    :
+        "{{ teacher.phone_number }}",
+            age
+    :
+        "{{ teacher.age }}",
+            born_date
+    :
+        "{{ teacher.born_date|date:'Y-m-d' }}",
+            address
+    :
+        `{{ teacher.address }}`,
+            fixed_salary
+    :
+        {
+            {
+                teacher.fixed_salary | lower
+            }
+        }
+    ,
+        salary: "{{ teacher.salary }}",
+            percentage
+    :
+        "{{ teacher.percentage }}",
+            status
+    :
+        "{{ teacher.status }}"
+    }
+    ,
+    {%
+        endfor %
+    }
+    ]
+    ;
+
+    // Initialize the page
+    document.addEventListener('DOMContentLoaded', () => {
+        // Event listeners
+        addTeacherBtn.addEventListener('click', openAddModal);
+        closeModal.addEventListener('click', closeTeacherModal);
+        cancelBtn.addEventListener('click', closeTeacherModal);
+
+        // Filter form elements
+        document.querySelectorAll('.filter-select').forEach(select => {
+            select.addEventListener('change', () => filterForm.submit());
+        });
+
+        // Edit buttons
+        document.querySelectorAll('.edit-btn').forEach(btn => {
+            btn.addEventListener('click', () => openEditModal(btn.dataset.id));
+        });
+
+        // Delete buttons
+        document.querySelectorAll('.delete-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                if (confirm('Are you sure you want to change this teacher\'s status?')) {
+                    window.location.href = `{% url 'toggle_teacher_status' 0 %}${btn.dataset.id}/`.replace('0/', '');
+                }
+            });
+        });
+    });
+
+    // Open modal for adding new teacher
+    function openAddModal() {
+        modalTitle.textContent = 'Add New Teacher';
+        teacherForm.reset();
+        document.getElementById('teacherId').value = '';
+        document.getElementById('status').value = '1';  // Active by default
+        teacherModal.style.display = 'flex';
+    }
+
+    // Open modal for editing teacher
+    function openEditModal(id) {
+        const teacher = teachersData.find(t => t.id == id);
+        if (teacher) {
+            modalTitle.textContent = 'Edit Teacher';
+            document.getElementById('teacherId').value = teacher.id;
+            document.getElementById('firstName').value = teacher.firstName;
+            document.getElementById('lastName').value = teacher.lastName;
+            document.getElementById('email').value = teacher.email;
+            document.getElementById('phone_number').value = teacher.phone;
+            document.getElementById('age').value = teacher.age;
+            document.getElementById('born_date').value = teacher.born_date;
+            document.getElementById('address').value = teacher.address;
+
+            // Set salary type
+            if (teacher.fixed_salary) {
+                document.querySelector('input[name="fixed_salary"][value="true"]').checked = true;
+                document.getElementById('salary').value = teacher.salary;
+            } else {
+                document.querySelector('input[name="fixed_salary"][value="false"]').checked = true;
+                document.getElementById('salary').value = teacher.percentage;
+            }
+
+            document.getElementById('status').value = teacher.status;
+            teacherModal.style.display = 'flex';
+        }
+    }
+
+    // Close modal
+    function closeTeacherModal() {
+        teacherModal.style.display = 'none';
+    }
+
+    // Handle salary type change
+    document.querySelectorAll('input[name="fixed_salary"]').forEach(radio => {
+        radio.addEventListener('change', function () {
+            const salaryInput = document.getElementById('salary');
+            if (this.value === 'true') {
+                salaryInput.placeholder = "Fixed Salary";
+            } else {
+                salaryInput.placeholder = "Percentage";
+            }
+        });
+    });
+</script>
+</body>
+</html>

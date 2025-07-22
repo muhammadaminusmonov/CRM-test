@@ -1,0 +1,854 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CRM - Attendance Management</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        :root {
+            --sidebar-width: 260px;
+            --sidebar-bg: #1e1e2d;
+            --sidebar-hover: #2a2a3c;
+            --sidebar-active: #3699ff;
+            --sidebar-text: #a2a3b7;
+            --main-bg: #f5f8fa;
+            --header-height: 70px;
+            --transition: all 0.3s ease;
+            --card-bg: #ffffff;
+            --primary: #3699ff;
+            --secondary: #8950fc;
+            --success: #1bc5bd;
+            --warning: #ffa800;
+            --danger: #f64e60;
+            --text-primary: #3f4254;
+            --text-secondary: #b5b5c3;
+            --present: #1bc5bd;
+            --absent: #f64e60;
+            --late: #ffa800;
+            --excused: #8950fc;
+        }
+
+        a {
+            text-decoration: none;
+            color: inherit;
+        }
+
+        body {
+            display: flex;
+            background-color: var(--main-bg);
+            height: 100vh;
+            overflow: hidden;
+            color: var(--text-primary);
+        }
+
+        /* Sidebar Styles */
+        .sidebar {
+            width: var(--sidebar-width);
+            background: var(--sidebar-bg);
+            height: 100vh;
+            padding: 20px 0;
+            transition: var(--transition);
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            z-index: 100;
+        }
+
+        .logo {
+            color: white;
+            font-size: 28px;
+            font-weight: 700;
+            text-align: center;
+            padding: 20px 0;
+            margin-bottom: 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .nav-links {
+            flex: 1;
+            overflow-y: auto;
+            padding: 0 15px;
+        }
+
+        .nav-links::-webkit-scrollbar {
+            width: 5px;
+        }
+
+        .nav-links::-webkit-scrollbar-thumb {
+            background: var(--sidebar-active);
+            border-radius: 10px;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            padding: 14px 20px;
+            margin: 8px 0;
+            border-radius: 8px;
+            color: var(--sidebar-text);
+            text-decoration: none;
+            transition: var(--transition);
+            cursor: pointer;
+        }
+
+        .nav-item:hover {
+            background: var(--sidebar-hover);
+            color: white;
+            transform: translateX(5px);
+        }
+
+        .nav-item.active {
+            background: var(--sidebar-active);
+            color: white;
+            box-shadow: 0 4px 10px rgba(54, 153, 255, 0.3);
+        }
+
+        .nav-item i {
+            font-size: 18px;
+            width: 30px;
+            margin-right: 15px;
+            text-align: center;
+        }
+
+        .nav-text {
+            font-size: 15px;
+            font-weight: 500;
+        }
+
+        /* Main Content Styles */
+        .main-content {
+            flex: 1;
+            height: 100vh;
+            overflow: auto;
+            position: relative;
+            padding: 20px;
+        }
+
+        .content-header {
+            height: var(--header-height);
+            background: white;
+            box-shadow: 0 1px 15px rgba(0, 0, 0, 0.04);
+            padding: 0 30px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .welcome-text {
+            font-size: 18px;
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        .date-display {
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        .page-title {
+            font-size: 24px;
+            color: var(--text-primary);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+        }
+
+        .page-title i {
+            margin-right: 12px;
+            color: var(--primary);
+        }
+
+        .attendance-container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .card-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .controls-container {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 25px;
+        }
+
+        .date-controls {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .date-control {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .date-control label {
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-bottom: 6px;
+            font-weight: 500;
+        }
+
+        .date-control input {
+            padding: 10px 15px;
+            border: 1px solid #e1e3ea;
+            border-radius: 8px;
+            font-size: 15px;
+            transition: var(--transition);
+            width: 200px;
+        }
+
+        .date-control input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(54, 153, 255, 0.1);
+        }
+
+        .group-controls {
+            display: flex;
+            gap: 15px;
+        }
+
+        .back-btn {
+            display: flex;
+            align-items: center;
+            padding: 10px 15px;
+            background: #f5f8fa;
+            border: 1px solid #e1e3ea;
+            border-radius: 8px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+            color: var(--text-primary);
+        }
+
+        .back-btn i {
+            margin-right: 8px;
+        }
+
+        .back-btn:hover {
+            background: #edf2f7;
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .group-info {
+            display: flex;
+            align-items: center;
+            padding: 10px 15px;
+            background: #f5f8fa;
+            border-radius: 8px;
+            font-weight: 500;
+        }
+
+        .group-info i {
+            margin-right: 8px;
+            color: var(--primary);
+        }
+
+        /* Table Styles */
+        .table-responsive {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            text-align: left;
+            padding: 15px 10px;
+            color: var(--text-secondary);
+            font-weight: 600;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        td {
+            text-align: left;
+            padding: 15px 10px;
+            color: var(--text-primary);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:hover td {
+            background: rgba(54, 153, 255, 0.03);
+        }
+
+        .avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #e1e3ea;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-right: 10px;
+        }
+
+        .student-info {
+            display: flex;
+            align-items: center;
+        }
+
+        .student-name {
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .student-id {
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        .attendance-status {
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            cursor: pointer;
+            transition: var(--transition);
+            position: relative;
+        }
+
+        .attendance-status i {
+            margin-right: 6px;
+        }
+
+        .status-present {
+            background: rgba(27, 197, 189, 0.1);
+            color: var(--present);
+        }
+
+        .status-absent {
+            background: rgba(246, 78, 96, 0.1);
+            color: var(--absent);
+        }
+
+        .status-late {
+            background: rgba(255, 168, 0, 0.1);
+            color: var(--late);
+        }
+
+        .status-excused {
+            background: rgba(137, 80, 252, 0.1);
+            color: var(--excused);
+        }
+
+        .status-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            width: 150px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            z-index: 100;
+            display: none;
+            overflow: hidden;
+        }
+
+        .status-option {
+            padding: 10px 15px;
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .status-option:hover {
+            background: #f5f8fa;
+        }
+
+        .status-option i {
+            margin-right: 10px;
+            width: 16px;
+            text-align: center;
+        }
+
+        .option-present { color: var(--present); }
+        .option-absent { color: var(--absent); }
+        .option-late { color: var(--late); }
+        .option-excused { color: var(--excused); }
+
+        .attendance-status:hover .status-dropdown {
+            display: block;
+        }
+
+        .group-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 20px;
+        }
+
+        .group-card {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            transition: var(--transition);
+            cursor: pointer;
+        }
+
+        .group-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .group-card-header {
+            padding: 20px;
+            background: var(--primary);
+            color: white;
+        }
+
+        .group-name {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .group-subject {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .group-card-body {
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .group-stats {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .stat-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .stat-item i {
+            margin-right: 8px;
+            width: 16px;
+            text-align: center;
+        }
+
+        .group-teacher {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .teacher-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #e1e3ea;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        /* Summary Stats */
+        .stats-container {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            gap: 20px;
+        }
+
+        .stat-card {
+            flex: 1;
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        }
+
+        .stat-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            margin-right: 15px;
+        }
+
+        .icon-present { background: rgba(27, 197, 189, 0.1); color: var(--present); }
+        .icon-absent { background: rgba(246, 78, 96, 0.1); color: var(--absent); }
+        .icon-late { background: rgba(255, 168, 0, 0.1); color: var(--late); }
+        .icon-excused { background: rgba(137, 80, 252, 0.1); color: var(--excused); }
+
+        .stat-content {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .stat-label {
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 992px) {
+            .controls-container {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .stats-container {
+                flex-wrap: wrap;
+            }
+
+            .stat-card {
+                min-width: calc(50% - 10px);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .stats-container {
+                flex-direction: column;
+            }
+
+            .stat-card {
+                width: 100%;
+            }
+
+            .group-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .sidebar {
+                width: 80px;
+            }
+            .nav-text {
+                display: none;
+            }
+            .logo span {
+                display: none;
+            }
+            .logo::after {
+                content: "CRM";
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="logo">
+            <span>CRM</span>
+        </div>
+        <div class="nav-links">
+            <a href="{% url 'statistic' %}" class="nav-item">
+                <i class="fas fa-chart-bar"></i>
+                <span class="nav-text">Statistics</span>
+            </a>
+            <a href="{% url 'teacher' %}" class="nav-item">
+                <i class="fas fa-chalkboard-teacher"></i>
+                <span class="nav-text">Teachers</span>
+            </a>
+            <a href="{% url 'students_list' %}" class="nav-item">
+                <i class="fas fa-user-graduate"></i>
+                <span class="nav-text">Students</span>
+            </a>
+            <a href="{% url 'staff_list' %}" class="nav-item">
+                <i class="fas fa-users"></i>
+                <span class="nav-text">Staff</span>
+            </a>
+            <a href="{% url 'attendance' %}" class="nav-item active">
+                <i class="fas fa-calendar-check"></i>
+                <span class="nav-text">Attendance</span>
+            </a>
+            <a href="{% url 'classes' %}" class="nav-item">
+                <i class="fas fa-book-open"></i>
+                <span class="nav-text">Classes</span>
+            </a>
+            <a href="{% url 'group_management' %}" class="nav-item">
+                <i class="fas fa-object-group"></i>
+                <span class="nav-text">Groups</span>
+            </a>
+            <a href="{% url 'costs_management' %}" class="nav-item">
+                <i class="fas fa-money-bill-wave"></i>
+                <span class="nav-text">Costs</span>
+            </a>
+            <a href="{% url 'expense_management' %}" class="nav-item">
+                <i class="fas fa-file-invoice-dollar"></i>
+                <span class="nav-text">Expenses</span>
+            </a>
+            <a href="{% url 'payment_management' %}" class="nav-item">
+                <i class="fas fa-credit-card"></i>
+                <span class="nav-text">Payments</span>
+            </a>
+            <a href="{% url 'profit_analysis' %}" class="nav-item">
+                <i class="fas fa-chart-line"></i>
+                <span class="nav-text">Profit</span>
+            </a>
+            <a href="{% url 'teacher_salary' %}" class="nav-item">
+                <i class="fas fa-money-check-alt"></i>
+                <span class="nav-text">Teacher Salary</span>
+            </a>
+            <a href="{% url 'staff_salary' %}" class="nav-item">
+                <i class="fas fa-money-check"></i>
+                <span class="nav-text">Staff Salary</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="content-header">
+            <div class="welcome-text">Attendance Management</div>
+            <div class="date-display" id="currentDateDisplay">
+                {% now "l, F j, Y" %}
+            </div>
+        </div>
+
+        <div class="page-title">
+            <i class="fas fa-calendar-check"></i>
+            <h1>Student Attendance</h1>
+        </div>
+
+        <div class="attendance-container">
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title" id="sectionTitle">
+                        {% if current_group_id %}Group Attendance{% else %}Select a Group{% endif %}
+                    </div>
+                </div>
+
+                <form method="post" action="{% if current_group_id %}{% url 'group_attendance' group_id=current_group_id date=date %}{% else %}{% url 'attendance' %}{% endif %}">
+                    {% csrf_token %}
+
+                    <div class="controls-container">
+                        <div class="date-controls">
+                            <div class="date-control">
+                                <label for="datePicker">Select Date</label>
+                                <input type="date" id="datePicker" name="date" value="{{ date }}">
+                            </div>
+                        </div>
+
+                        <div class="group-controls" id="groupControls" {% if not current_group_id %}style="display: none;"{% endif %}>
+                            <a href="{% url 'attendance' %}" class="back-btn" id="backToGroups">
+                                <i class="fas fa-arrow-left"></i> Back to Groups
+                            </a>
+                            <div class="group-info">
+                                <i class="fas fa-users"></i>
+                                <span id="currentGroup">
+                                    {% if group %}{{ group.name }}{% endif %}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    {% if group %}
+                    <div id="attendanceSummary">
+                        <div class="stats-container">
+                            <div class="stat-card">
+                                <div class="stat-icon icon-present">
+                                    <i class="fas fa-check-circle"></i>
+                                </div>
+                                <div class="stat-content">
+                                    <div class="stat-value" id="presentCount">{{ status_counts.1 }}</div>
+                                    <div class="stat-label">Present Students</div>
+                                </div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-icon icon-absent">
+                                    <i class="fas fa-times-circle"></i>
+                                </div>
+                                <div class="stat-content">
+                                    <div class="stat-value" id="absentCount">{{ status_counts.2 }}</div>
+                                    <div class="stat-label">Absent Students</div>
+                                </div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-icon icon-excused">
+                                    <i class="fas fa-user-clock"></i>
+                                </div>
+                                <div class="stat-content">
+                                    <div class="stat-value" id="excusedCount">{{ status_counts.3 }}</div>
+                                    <div class="stat-label">Excused Absences</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <div id="groupsSection" {% if group %}style="display: none;"{% endif %}>
+                        <div class="group-grid" id="groupsGrid">
+                            {% for g in groups %}
+                            <a href="{% url 'group_attendance' group_id=g.id date=date %}" class="group-card">
+                                <div class="group-card-header">
+                                    <div class="group-name">{{ g.name }}</div>
+                                    <div class="group-subject">{{ g.classes.title }}</div>
+                                </div>
+                                <div class="group-card-body">
+                                    <div class="group-stats">
+                                        <div class="stat-item">
+                                            <i class="fas fa-users"></i>
+                                            <span>{{ g.student.count }} Students</span>
+                                        </div>
+                                        <div class="stat-item">
+                                            <i class="fas fa-chalkboard-teacher"></i>
+                                            <span>{{ g.teacher.first_name }} {{ g.teacher.last_name }}</span>
+                                        </div>
+                                    </div>
+                                    <div class="group-teacher">
+                                        <div class="teacher-avatar">
+                                            {{ g.teacher.first_name|first }}{{ g.teacher.last_name|first }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </a>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    {% if group %}
+                    <div id="studentsSection">
+                        <div class="table-responsive">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Student</th>
+                                        <th>Status</th>
+                                        <th>Last Attendance</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="studentsTable">
+                                    {% for attendance in attendances %}
+                                    <tr>
+                                        <td>
+                                            <div class="student-info">
+                                                <div class="avatar">
+                                                    {{ attendance.student.first_name|first }}{{ attendance.student.last_name|first }}
+                                                </div>
+                                                <div>
+                                                    <div class="student-name">
+                                                        {{ attendance.student.first_name }} {{ attendance.student.last_name }}
+                                                    </div>
+                                                    <div class="student-id">ID: {{ attendance.student.id }}</div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <select name="status_{{ attendance.student.id }}" class="attendance-status status-{% if attendance.status == 1 %}present{% elif attendance.status == 2 %}absent{% else %}excused{% endif %}">
+                                                <option value="1" {% if attendance.status == 1 %}selected{% endif %}>Present</option>
+                                                <option value="2" {% if attendance.status == 2 %}selected{% endif %}>Absent</option>
+                                                <option value="3" {% if attendance.status == 3 %}selected{% endif %}>Excused</option>
+                                            </select>
+                                        </td>
+                                        <td>{{ attendance.date|date:"M d, Y" }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        <div style="margin-top: 20px; text-align: right;">
+                            <button type="submit" class="back-btn" style="background: var(--primary); color: white; border: none;">
+                                <i class="fas fa-save"></i> Save Attendance
+                            </button>
+                        </div>
+                    </div>
+                    {% endif %}
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Set current date in date picker
+        document.getElementById('datePicker').addEventListener('change', function() {
+            const date = this.value;
+
+            // If on group page, redirect with new date
+            if (window.location.pathname.includes('/group/')) {
+                const pathParts = window.location.pathname.split('/');
+                const groupId = pathParts[3];
+                window.location.href = `/attendance/group/${groupId}/${date}/`;
+            }
+            // Else reload main page with new date
+            else {
+                window.location.href = `{% url 'attendance' %}?date=${date}`;
+            }
+        });
+
+        // Update dropdown styling based on selection
+        document.querySelectorAll('select.attendance-status').forEach(select => {
+            updateStatusStyle(select);
+
+            select.addEventListener('change', function() {
+                updateStatusStyle(this);
+            });
+        });
+
+        function updateStatusStyle(select) {
+            // Reset classes
+            select.className = 'attendance-status';
+
+            // Add appropriate status class
+            if (select.value === '1') {
+                select.classList.add('status-present');
+            } else if (select.value === '2') {
+                select.classList.add('status-absent');
+            } else {
+                select.classList.add('status-excused');
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,1397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CRM - Costs Management</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        :root {
+            --sidebar-width: 260px;
+            --sidebar-bg: #1e1e2d;
+            --sidebar-hover: #2a2a3c;
+            --sidebar-active: #3699ff;
+            --sidebar-text: #a2a3b7;
+            --main-bg: #f5f8fa;
+            --header-height: 70px;
+            --transition: all 0.3s ease;
+            --card-bg: #ffffff;
+            --primary: #3699ff;
+            --secondary: #8950fc;
+            --success: #1bc5bd;
+            --warning: #ffa800;
+            --danger: #f64e60;
+            --text-primary: #3f4254;
+            --text-secondary: #b5b5c3;
+        }
+
+        body {
+            display: flex;
+            background-color: var(--main-bg);
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Sidebar Styles */
+        .sidebar {
+            width: var(--sidebar-width);
+            background: var(--sidebar-bg);
+            height: 100vh;
+            padding: 20px 0;
+            transition: var(--transition);
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            z-index: 100;
+        }
+
+        .logo {
+            color: white;
+            font-size: 28px;
+            font-weight: 700;
+            text-align: center;
+            padding: 20px 0;
+            margin-bottom: 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .nav-links {
+            flex: 1;
+            overflow-y: auto;
+            padding: 0 15px;
+        }
+
+        .nav-links::-webkit-scrollbar {
+            width: 5px;
+        }
+
+        .nav-links::-webkit-scrollbar-thumb {
+            background: var(--sidebar-active);
+            border-radius: 10px;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            padding: 14px 20px;
+            margin: 8px 0;
+            border-radius: 8px;
+            color: var(--sidebar-text);
+            text-decoration: none;
+            transition: var(--transition);
+            cursor: pointer;
+        }
+
+        .nav-item:hover {
+            background: var(--sidebar-hover);
+            color: white;
+            transform: translateX(5px);
+        }
+
+        .nav-item.active {
+            background: var(--sidebar-active);
+            color: white;
+            box-shadow: 0 4px 10px rgba(54, 153, 255, 0.3);
+        }
+
+        .nav-item i {
+            font-size: 18px;
+            width: 30px;
+            margin-right: 15px;
+            text-align: center;
+        }
+
+        .nav-text {
+            font-size: 15px;
+            font-weight: 500;
+        }
+
+        /* Main Content Styles */
+        .main-content {
+            flex: 1;
+            height: 100vh;
+            overflow: auto;
+            position: relative;
+            padding: 20px;
+        }
+
+        .content-header {
+            height: var(--header-height);
+            background: white;
+            box-shadow: 0 1px 15px rgba(0, 0, 0, 0.04);
+            padding: 0 30px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .welcome-text {
+            font-size: 18px;
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        .date-display {
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        .page-title {
+            font-size: 24px;
+            color: var(--text-primary);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+        }
+
+        .page-title i {
+            margin-right: 12px;
+            color: var(--primary);
+        }
+
+        .costs-container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+            transition: var(--transition);
+        }
+
+        .card:hover {
+            box-shadow: 0 6px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .card-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            border: none;
+            display: inline-flex;
+            align-items: center;
+        }
+
+        .btn i {
+            margin-right: 8px;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+            box-shadow: 0 4px 10px rgba(54, 153, 255, 0.3);
+        }
+
+        .btn-primary:hover {
+            background: #187de4;
+            transform: translateY(-2px);
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid #e1e3ea;
+            color: var(--text-primary);
+        }
+
+        .btn-outline:hover {
+            background: #f5f8fa;
+        }
+
+        .btn-danger {
+            background: rgba(246, 78, 96, 0.1);
+            color: var(--danger);
+        }
+
+        .btn-danger:hover {
+            background: var(--danger);
+            color: white;
+        }
+
+        /* Table Styles */
+        .table-responsive {
+            overflow-x: auto;
+            border-radius: 8px;
+            border: 1px solid #ebedf3;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            text-align: left;
+            padding: 15px 10px;
+            color: var(--text-secondary);
+            font-weight: 600;
+            background: #f8f9fa;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        td {
+            text-align: left;
+            padding: 15px 10px;
+            color: var(--text-primary);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:hover td {
+            background: rgba(54, 153, 255, 0.03);
+        }
+
+        .cost-title {
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .cost-description {
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        .status {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            display: inline-block;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .status.paid {
+            background: rgba(27, 197, 189, 0.1);
+            color: var(--success);
+        }
+
+        .status.pending {
+            background: rgba(255, 168, 0, 0.1);
+            color: var(--warning);
+        }
+
+        .status.overdue {
+            background: rgba(246, 78, 96, 0.1);
+            color: var(--danger);
+        }
+
+        .status:hover {
+            opacity: 0.9;
+            transform: scale(1.05);
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+        }
+
+        .action-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .edit-btn {
+            background: rgba(54, 153, 255, 0.1);
+            color: var(--primary);
+        }
+
+        .edit-btn:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        .delete-btn {
+            background: rgba(246, 78, 96, 0.1);
+            color: var(--danger);
+        }
+
+        .delete-btn:hover {
+            background: var(--danger);
+            color: white;
+        }
+
+        /* Stats Cards */
+        .stats-container {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+            display: flex;
+            flex-direction: column;
+            transition: var(--transition);
+        }
+
+        .stat-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 25px rgba(0, 0, 0, 0.08);
+        }
+
+        .stat-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .stat-title {
+            font-size: 16px;
+            color: var(--text-secondary);
+            font-weight: 600;
+        }
+
+        .stat-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+        }
+
+        .stat-icon.primary {
+            background: rgba(54, 153, 255, 0.1);
+            color: var(--primary);
+        }
+
+        .stat-icon.secondary {
+            background: rgba(137, 80, 252, 0.1);
+            color: var(--secondary);
+        }
+
+        .stat-icon.success {
+            background: rgba(27, 197, 189, 0.1);
+            color: var(--success);
+        }
+
+        .stat-icon.warning {
+            background: rgba(255, 168, 0, 0.1);
+            color: var(--warning);
+        }
+
+        .stat-value {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+        }
+
+        .stat-meta {
+            display: flex;
+            align-items: center;
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        .stat-trend {
+            display: flex;
+            align-items: center;
+            margin-top: 5px;
+            font-size: 13px;
+        }
+
+        .trend-up {
+            color: var(--success);
+        }
+
+        .trend-down {
+            color: var(--danger);
+        }
+
+        /* Chart Container */
+        .chart-container {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+            margin-bottom: 20px;
+            height: 350px;
+        }
+
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 5px;
+            margin-bottom: 20px;
+        }
+
+        .tab {
+            flex: 1;
+            text-align: center;
+            padding: 12px;
+            cursor: pointer;
+            border-radius: 6px;
+            transition: var(--transition);
+        }
+
+        .tab.active {
+            background: white;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 12px;
+            width: 100%;
+            max-width: 600px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+        }
+
+        .modal-header {
+            padding: 20px 25px;
+            background: var(--primary);
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-title {
+            font-size: 20px;
+            font-weight: 600;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+        }
+
+        .close-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .modal-body {
+            padding: 25px;
+            max-height: 70vh;
+            overflow-y: auto;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #e1e3ea;
+            border-radius: 8px;
+            font-size: 15px;
+            transition: var(--transition);
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(54, 153, 255, 0.1);
+        }
+
+        textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 20px;
+        }
+
+        .form-row .form-group {
+            flex: 1;
+        }
+
+        .modal-footer {
+            padding: 20px 25px;
+            background: #f5f8fa;
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+        }
+
+        /* Search and Filter */
+        .table-controls {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .search-box {
+            position: relative;
+            width: 300px;
+        }
+
+        .search-box input {
+            padding-left: 40px;
+        }
+
+        .search-box i {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-secondary);
+        }
+
+        .filter-controls {
+            display: flex;
+            gap: 12px;
+        }
+
+        .filter-select {
+            min-width: 150px;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1200px) {
+            .stats-container {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 992px) {
+            .form-row {
+                flex-direction: column;
+                gap: 0;
+            }
+
+            .stats-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .table-controls {
+                flex-direction: column;
+                gap: 15px;
+            }
+            .search-box {
+                width: 100%;
+            }
+
+            .sidebar {
+                width: 80px;
+            }
+            .nav-text {
+                display: none;
+            }
+            .logo span {
+                display: none;
+            }
+            .logo::after {
+                content: "CRM";
+            }
+
+            .action-buttons {
+                flex-direction: column;
+            }
+
+            .chart-container {
+                height: 300px;
+            }
+        }
+
+        /* No Data */
+        .no-data {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--text-secondary);
+        }
+
+        .no-data i {
+            font-size: 48px;
+            margin-bottom: 15px;
+            color: #e1e3ea;
+        }
+
+        /* Amount Styles */
+        .amount {
+            font-weight: 600;
+        }
+
+        .amount.income {
+            color: var(--success);
+        }
+
+        .amount.expense {
+            color: var(--danger);
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="logo">
+            <span>CRM</span>
+        </div>
+        <div class="nav-links">
+            <a href="{% url 'statistic' %}" class="nav-item">
+                <i class="fas fa-chart-bar"></i>
+                <span class="nav-text">Statistics</span>
+            </a>
+            <a href="{% url 'teacher' %}" class="nav-item">
+                <i class="fas fa-chalkboard-teacher"></i>
+                <span class="nav-text">Teachers</span>
+            </a>
+            <a href="{% url 'students_list' %}" class="nav-item">
+                <i class="fas fa-user-graduate"></i>
+                <span class="nav-text">Students</span>
+            </a>
+            <a href="{% url 'staff_list' %}" class="nav-item">
+                <i class="fas fa-users"></i>
+                <span class="nav-text">Staff</span>
+            </a>
+            <a href="{% url 'attendance' %}" class="nav-item">
+                <i class="fas fa-calendar-check"></i>
+                <span class="nav-text">Attendance</span>
+            </a>
+            <a href="{% url 'classes' %}" class="nav-item">
+                <i class="fas fa-book-open"></i>
+                <span class="nav-text">Classes</span>
+            </a>
+            <a href="{% url 'group_management' %}" class="nav-item">
+                <i class="fas fa-object-group"></i>
+                <span class="nav-text">Groups</span>
+            </a>
+            <a href="{% url 'costs_management' %}" class="nav-item active">
+                <i class="fas fa-money-bill-wave"></i>
+                <span class="nav-text">Costs</span>
+            </a>
+            <a href="{% url 'expense_management' %}" class="nav-item">
+                <i class="fas fa-file-invoice-dollar"></i>
+                <span class="nav-text">Expenses</span>
+            </a>
+            <a href="{% url 'payment_management' %}" class="nav-item">
+                <i class="fas fa-credit-card"></i>
+                <span class="nav-text">Payments</span>
+            </a>
+            <a href="{% url 'profit_analysis' %}" class="nav-item">
+                <i class="fas fa-chart-line"></i>
+                <span class="nav-text">Profit</span>
+            </a>
+            <a href="{% url 'teacher_salary' %}" class="nav-item">
+                <i class="fas fa-money-check-alt"></i>
+                <span class="nav-text">Teacher Salary</span>
+            </a>
+            <a href="{% url 'staff_salary' %}" class="nav-item">
+                <i class="fas fa-money-check"></i>
+                <span class="nav-text">Staff Salary</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="content-header">
+            <div class="welcome-text">Costs Management</div>
+            <div class="date-display">{{ current_date|date:"l, F d, Y" }}</div>
+        </div>
+
+        <div class="page-title">
+            <i class="fas fa-money-bill-wave"></i>
+            <h1>Costs Overview</h1>
+        </div>
+
+        <div class="stats-container">
+            <div class="stat-card">
+                <div class="stat-header">
+                    <div class="stat-title">TEACHERS COSTS</div>
+                    <div class="stat-icon primary">
+                        <i class="fas fa-chalkboard-teacher"></i>
+                    </div>
+                </div>
+                <div class="stat-value">${{ teacher_costs|floatformat:2 }}</div>
+                <div class="stat-trend {% if teacher_trend >= 0 %}trend-up{% else %}trend-down{% endif %}">
+                    <i class="fas {% if teacher_trend >= 0 %}fa-arrow-up{% else %}fa-arrow-down{% endif %}"></i>
+                    <span>{{ teacher_trend|floatformat:0 }}% from last month</span>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-header">
+                    <div class="stat-title">STAFF COSTS</div>
+                    <div class="stat-icon secondary">
+                        <i class="fas fa-users"></i>
+                    </div>
+                </div>
+                <div class="stat-value">${{ staff_costs|floatformat:2 }}</div>
+                <div class="stat-trend {% if staff_trend >= 0 %}trend-up{% else %}trend-down{% endif %}">
+                    <i class="fas {% if staff_trend >= 0 %}fa-arrow-up{% else %}fa-arrow-down{% endif %}"></i>
+                    <span>{{ staff_trend|floatformat:0 }}% from last month</span>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-header">
+                    <div class="stat-title">EXPENSES</div>
+                    <div class="stat-icon warning">
+                        <i class="fas fa-file-invoice-dollar"></i>
+                    </div>
+                </div>
+                <div class="stat-value">${{ expenses|floatformat:2 }}</div>
+                <div class="stat-trend {% if expenses_trend >= 0 %}trend-up{% else %}trend-down{% endif %}">
+                    <i class="fas {% if expenses_trend >= 0 %}fa-arrow-up{% else %}fa-arrow-down{% endif %}"></i>
+                    <span>{{ expenses_trend|floatformat:0 }}% from last month</span>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-header">
+                    <div class="stat-title">TOTAL COSTS</div>
+                    <div class="stat-icon danger">
+                        <i class="fas fa-money-bill-wave"></i>
+                    </div>
+                </div>
+                <div class="stat-value">${{ total_costs|floatformat:2 }}</div>
+                <div class="stat-trend {% if total_trend >= 0 %}trend-up{% else %}trend-down{% endif %}">
+                    <i class="fas {% if total_trend >= 0 %}fa-arrow-up{% else %}fa-arrow-down{% endif %}"></i>
+                    <span>{{ total_trend|floatformat:0 }}% from last month</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="chart-container">
+            <div class="chart-header">
+                <div class="card-title">Monthly Costs Breakdown</div>
+                <div class="filter-controls">
+                    <select class="filter-select" id="timeFilter">
+                        <option value="3">Last 3 Months</option>
+                        <option value="6" selected>Last 6 Months</option>
+                        <option value="12">Last 12 Months</option>
+                    </select>
+                </div>
+            </div>
+            <canvas id="costsChart"></canvas>
+        </div>
+
+        <div class="tabs">
+            <div class="tab active" data-tab="teachers">Teachers Costs</div>
+            <div class="tab" data-tab="staff">Staff Costs</div>
+            <div class="tab" data-tab="expenses">Expenses</div>
+        </div>
+
+        <div class="costs-container">
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">Teachers Costs</div>
+                    <button class="btn btn-primary" id="addTeacherCostBtn">
+                        <i class="fas fa-plus"></i> Add Cost
+                    </button>
+                </div>
+
+                <div class="table-controls">
+                    <div class="search-box">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="searchTeacherInput" placeholder="Search teachers...">
+                    </div>
+                    <div class="filter-controls">
+                        <select class="filter-select" id="statusTeacherFilter">
+                            <option value="all">All Status</option>
+                            <option value="paid">Paid</option>
+                            <option value="pending">Pending</option>
+                            <option value="overdue">Overdue</option>
+                        </select>
+                        <select class="filter-select" id="monthTeacherFilter">
+                            <option value="all">All Months</option>
+                            <option value="1">January</option>
+                            <option value="2">February</option>
+                            <option value="3">March</option>
+                            <option value="4">April</option>
+                            <option value="5">May</option>
+                            <option value="6">June</option>
+                            <option value="7" selected>July</option>
+                            <!-- Add other months -->
+                        </select>
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Teacher</th>
+                                <th>Description</th>
+                                <th>Date</th>
+                                <th>Amount</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="teachersCostsTable">
+                            {% for cost in teacher_costs_data %}
+                            <tr>
+                                <td>
+                                    <div class="cost-title">{{ cost.teacher.first_name }} {{ cost.teacher.last_name }}</div>
+                                    <div class="cost-description">Salary</div>
+                                </td>
+                                <td>Monthly salary for {{ cost.month|date:"F Y" }}</td>
+                                <td>{{ cost.paid_date|date:"M d, Y" }}</td>
+                                <td>
+                                    <div class="amount expense">${{ cost.paid }}</div>
+                                </td>
+                                <td>
+                                    <div class="status {% if cost.paid == cost.salary %}paid{% else %}pending{% endif %}">
+                                        {% if cost.paid == cost.salary %}Paid{% else %}Pending{% endif %}
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="action-buttons">
+                                        <div class="action-btn edit-btn" data-id="{{ cost.id }}" data-type="teachers">
+                                            <i class="fas fa-edit"></i>
+                                        </div>
+                                        <div class="action-btn delete-btn" data-id="{{ cost.id }}" data-type="teachers">
+                                            <i class="fas fa-trash"></i>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="6">
+                                    <div class="no-data">
+                                        <i class="fas fa-file-invoice-dollar"></i>
+                                        <h3>No teacher costs found</h3>
+                                        <p>Try changing your filters or add a new cost</p>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add/Edit Cost Modal -->
+    <div class="modal" id="costModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title" id="modalTitle">Add New Cost</div>
+                <button class="close-btn" id="closeModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="costForm">
+                    {% csrf_token %}
+                    <input type="hidden" id="costId">
+                    <input type="hidden" id="costType">
+                    <div class="form-group">
+                        <label for="costName">Name</label>
+                        <input type="text" id="costName" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="description">Description</label>
+                        <textarea id="description" required></textarea>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="amount">Amount ($)</label>
+                            <input type="number" id="amount" min="0" step="0.01" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="date">Date</label>
+                            <input type="date" id="date" required>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="category">Category</label>
+                            <select id="category" required>
+                                <option value="">Select Category</option>
+                                <option value="salary">Salary</option>
+                                <option value="bonus">Bonus</option>
+                                <option value="overtime">Overtime</option>
+                                <option value="training">Training</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="status">Status</label>
+                            <select id="status" required>
+                                <option value="paid">Paid</option>
+                                <option value="pending">Pending</option>
+                                <option value="overdue">Overdue</option>
+                            </select>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" id="cancelBtn">Cancel</button>
+                <button class="btn btn-primary" id="saveCostBtn">Save Cost</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Get chart data from Django context
+        const chartData = JSON.parse('{{ chart_data|escapejs }}');
+        const csrfToken = "{{ csrf_token }}";
+        let costsChart = null;
+
+        // DOM elements
+        const costModal = document.getElementById('costModal');
+        const modalTitle = document.getElementById('modalTitle');
+        const addTeacherCostBtn = document.getElementById('addTeacherCostBtn');
+        const closeModal = document.getElementById('closeModal');
+        const saveCostBtn = document.getElementById('saveCostBtn');
+        const costForm = document.getElementById('costForm');
+        const searchTeacherInput = document.getElementById('searchTeacherInput');
+        const statusTeacherFilter = document.getElementById('statusTeacherFilter');
+        const monthTeacherFilter = document.getElementById('monthTeacherFilter');
+        const tabs = document.querySelectorAll('.tab');
+        let currentCostType = "teachers";
+
+        // Initialize the page
+        document.addEventListener('DOMContentLoaded', () => {
+            renderCostsChart();
+            setupEventListeners();
+        });
+
+        function setupEventListeners() {
+            addTeacherCostBtn.addEventListener('click', () => openAddModal('teachers'));
+            closeModal.addEventListener('click', closeCostModal);
+            saveCostBtn.addEventListener('click', saveCost);
+            searchTeacherInput.addEventListener('input', () => filterCosts(currentCostType));
+            statusTeacherFilter.addEventListener('change', () => filterCosts(currentCostType));
+            monthTeacherFilter.addEventListener('change', () => filterCosts(currentCostType));
+
+            // Tab switching
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    tabs.forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+                    currentCostType = tab.dataset.tab;
+                    switchTab(currentCostType);
+                });
+            });
+
+            // Edit and delete buttons
+            document.querySelectorAll('.edit-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    openEditModal(btn.dataset.id, btn.dataset.type);
+                });
+            });
+
+            document.querySelectorAll('.delete-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    deleteCost(btn.dataset.id, btn.dataset.type);
+                });
+            });
+        }
+
+        // Render costs chart
+        function renderCostsChart() {
+            const ctx = document.getElementById('costsChart').getContext('2d');
+
+            // Destroy previous chart if exists
+            if (costsChart) {
+                costsChart.destroy();
+            }
+
+            costsChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: chartData.months,
+                    datasets: [
+                        {
+                            label: 'Teachers Costs',
+                            data: chartData.teacher_data,
+                            backgroundColor: 'rgba(54, 153, 255, 0.7)',
+                            borderColor: 'rgba(54, 153, 255, 1)',
+                            borderWidth: 1
+                        },
+                        {
+                            label: 'Staff Costs',
+                            data: chartData.staff_data,
+                            backgroundColor: 'rgba(137, 80, 252, 0.7)',
+                            borderColor: 'rgba(137, 80, 252, 1)',
+                            borderWidth: 1
+                        },
+                        {
+                            label: 'Expenses',
+                            data: chartData.expenses_data,
+                            backgroundColor: 'rgba(255, 168, 0, 0.7)',
+                            borderColor: 'rgba(255, 168, 0, 1)',
+                            borderWidth: 1
+                        },
+                        {
+                            label: 'Total Costs',
+                            data: chartData.total_data,
+                            type: 'line',
+                            fill: false,
+                            borderColor: 'rgba(246, 78, 96, 1)',
+                            borderWidth: 3,
+                            pointBackgroundColor: 'rgba(246, 78, 96, 1)',
+                            pointRadius: 5
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                drawBorder: false
+                            },
+                            ticks: {
+                                callback: function(value) {
+                                    return '$' + value;
+                                }
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    if (context.parsed.y !== null) {
+                                        label += new Intl.NumberFormat('en-US', {
+                                            style: 'currency',
+                                            currency: 'USD'
+                                        }).format(context.parsed.y);
+                                    }
+                                    return label;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Switch between tabs
+        function switchTab(type) {
+            currentCostType = type;
+            // In a real implementation, this would load the appropriate table content
+            // For this demo, we're just changing the UI
+            alert(`Switched to ${type} tab. In a real app, this would load ${type} data.`);
+        }
+
+        // Open modal for adding new cost
+        function openAddModal(type) {
+            modalTitle.textContent = `Add New ${type.charAt(0).toUpperCase() + type.slice(1)} Cost`;
+            costForm.reset();
+            document.getElementById('costId').value = '';
+            document.getElementById('costType').value = type;
+            costModal.style.display = 'flex';
+        }
+
+        // Open modal for editing cost
+        function openEditModal(id, type) {
+            modalTitle.textContent = `Edit ${type.charAt(0).toUpperCase() + type.slice(1)} Cost`;
+            document.getElementById('costId').value = id;
+            document.getElementById('costType').value = type;
+
+            // In a real implementation, this would load the cost data
+            // For demo, we'll just show the modal
+            costModal.style.display = 'flex';
+        }
+
+        // Close modal
+        function closeCostModal() {
+            costModal.style.display = 'none';
+        }
+
+        // Save cost
+        function saveCost() {
+            const id = document.getElementById('costId').value;
+            const type = document.getElementById('costType').value;
+            const name = document.getElementById('costName').value;
+            const description = document.getElementById('description').value;
+            const amount = document.getElementById('amount').value;
+            const date = document.getElementById('date').value;
+            const category = document.getElementById('category').value;
+            const status = document.getElementById('status').value;
+
+            // In a real implementation, this would send data to the server
+            // For demo, we'll just show a notification
+            showNotification(
+                `Cost for "${name}" has been ${id ? 'updated' : 'added'}`,
+                'success'
+            );
+
+            closeCostModal();
+        }
+
+        // Delete cost
+        function deleteCost(id, type) {
+            if (confirm('Are you sure you want to delete this cost? This action cannot be undone.')) {
+                // In a real implementation, this would send a DELETE request to the server
+                // For demo, we'll just show a notification
+                showNotification(
+                    `Cost has been deleted`,
+                    'danger'
+                );
+            }
+        }
+
+        // Filter costs (client-side implementation for demo)
+        function filterCosts(type) {
+            const searchTerm = searchTeacherInput.value.toLowerCase();
+            const statusValue = statusTeacherFilter.value;
+            const monthValue = monthTeacherFilter.value;
+
+            const rows = document.querySelectorAll('#teachersCostsTable tr');
+
+            rows.forEach(row => {
+                if (row.querySelector('.no-data')) return;
+
+                const name = row.querySelector('.cost-title').textContent.toLowerCase();
+                const description = row.querySelector('td:nth-child(2)').textContent.toLowerCase();
+                const status = row.querySelector('.status').className.includes(statusValue) || statusValue === 'all';
+                const month = row.querySelector('td:nth-child(3)').textContent.toLowerCase();
+
+                // Simple month filter for demo
+                const monthMatch = monthValue === 'all' ||
+                                 month.includes(getMonthName(monthValue)) ||
+                                 monthValue === 'all';
+
+                const matchesSearch = name.includes(searchTerm) ||
+                                    description.includes(searchTerm);
+
+                if (matchesSearch && status && monthMatch) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        }
+
+        // Helper to get month name from number
+        function getMonthName(monthNum) {
+            const months = [
+                'January', 'February', 'March', 'April', 'May', 'June',
+                'July', 'August', 'September', 'October', 'November', 'December'
+            ];
+            return months[parseInt(monthNum) - 1] || '';
+        }
+
+        // Show notification
+        function showNotification(message, type) {
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.innerHTML = `
+                <div class="notification-content">
+                    <i class="fas ${type === 'paid' || type === 'success' ? 'fa-check-circle' :
+                      type === 'pending' || type === 'warning' ? 'fa-exclamation-circle' :
+                      'fa-times-circle'}"></i>
+                    <span>${message}</span>
+                </div>
+                <div class="notification-progress"></div>
+            `;
+
+            document.body.appendChild(notification);
+
+            setTimeout(() => {
+                notification.classList.add('show');
+                setTimeout(() => {
+                    notification.classList.remove('show');
+                    setTimeout(() => {
+                        document.body.removeChild(notification);
+                    }, 300);
+                }, 3000);
+            }, 10);
+        }
+
+        // Add notification styles dynamically
+        const style = document.createElement('style');
+        style.innerHTML = `
+            .notification {
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: white;
+                border-radius: 8px;
+                box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+                padding: 16px 20px;
+                min-width: 300px;
+                transform: translateX(120%);
+                transition: transform 0.3s ease;
+                z-index: 10000;
+                border-left: 4px solid var(--primary);
+            }
+
+            .notification.paid, .notification.success {
+                border-left-color: var(--success);
+            }
+
+            .notification.pending, .notification.warning {
+                border-left-color: var(--warning);
+            }
+
+            .notification.overdue, .notification.danger {
+                border-left-color: var(--danger);
+            }
+
+            .notification.show {
+                transform: translateX(0);
+            }
+
+            .notification-content {
+                display: flex;
+                align-items: center;
+                margin-bottom: 8px;
+            }
+
+            .notification-content i {
+                font-size: 20px;
+                margin-right: 12px;
+            }
+
+            .notification.paid .notification-content i,
+            .notification.success .notification-content i {
+                color: var(--success);
+            }
+
+            .notification.pending .notification-content i,
+            .notification.warning .notification-content i {
+                color: var(--warning);
+            }
+
+            .notification.overdue .notification-content i,
+            .notification.danger .notification-content i {
+                color: var(--danger);
+            }
+
+            .notification-progress {
+                height: 3px;
+                width: 100%;
+                background: #e1e3ea;
+                border-radius: 2px;
+                overflow: hidden;
+            }
+
+            .notification-progress::after {
+                content: '';
+                display: block;
+                height: 100%;
+                width: 100%;
+                background: var(--primary);
+                animation: progress 3s linear forwards;
+            }
+
+            .notification.paid .notification-progress::after,
+            .notification.success .notification-progress::after {
+                background: var(--success);
+            }
+
+            .notification.pending .notification-progress::after,
+            .notification.warning .notification-progress::after {
+                background: var(--warning);
+            }
+
+            .notification.overdue .notification-progress::after,
+            .notification.danger .notification-progress::after {
+                background: var(--danger);
+            }
+
+            @keyframes progress {
+                from { transform: translateX(-100%); }
+                to { transform: translateX(0); }
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+</body>
+</html>
